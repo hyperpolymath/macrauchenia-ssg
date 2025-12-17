@@ -13,6 +13,29 @@ export const description = "Web framework in Tcl with static site generation cap
 let connected = false;
 let tclshPath = "tclsh";
 
+// Security: Validate and sanitize inputs to prevent Tcl code injection
+function sanitizeTclString(str) {
+  if (typeof str !== "string") return "";
+  // Reject strings with dangerous Tcl metacharacters
+  if (/[\[\]$\\{}";\n\r]/.test(str)) {
+    throw new Error("Invalid characters in input: Tcl special characters not allowed");
+  }
+  // Allow only safe path characters
+  if (!/^[a-zA-Z0-9._\-/]+$/.test(str)) {
+    throw new Error("Invalid characters in input: only alphanumeric, dots, dashes, underscores, and slashes allowed");
+  }
+  return str;
+}
+
+function validatePath(path) {
+  if (!path) return ".";
+  const sanitized = sanitizeTclString(path);
+  if (sanitized.includes("..")) {
+    throw new Error("Path traversal not allowed");
+  }
+  return sanitized;
+}
+
 async function runCommand(args, cwd = null) {
   const cmd = new Deno.Command(tclshPath, {
     args,
@@ -73,8 +96,13 @@ export const tools = [
       },
     },
     execute: async ({ path, config }) => {
-      const args = [config || "wub.tcl"];
-      return await runCommand(args, path);
+      try {
+        const safePath = validatePath(path);
+        const safeConfig = config ? sanitizeTclString(config) : "wub.tcl";
+        return await runCommand([safeConfig], safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -88,12 +116,20 @@ export const tools = [
       },
     },
     execute: async ({ path, output }) => {
-      const script = `
-        source wub.tcl
-        package require Wub
-        Wub generate ${output || "public"}
-      `;
-      return await runCommand(["-c", script], path);
+      try {
+        const safePath = validatePath(path);
+        const safeOutput = output ? sanitizeTclString(output) : "public";
+        // Use Tcl variable to prevent injection
+        const script = `
+          source wub.tcl
+          package require Wub
+          set output_dir {${safeOutput}}
+          Wub generate $output_dir
+        `;
+        return await runCommand(["-c", script], safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -107,7 +143,15 @@ export const tools = [
       },
       required: ["script"],
     },
-    execute: async ({ path, script }) => await runCommand([script], path),
+    execute: async ({ path, script }) => {
+      try {
+        const safePath = validatePath(path);
+        const safeScript = sanitizeTclString(script);
+        return await runCommand([safeScript], safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
+    },
   },
   {
     name: "wub_version",

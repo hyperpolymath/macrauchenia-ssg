@@ -13,6 +13,32 @@ export const description = "Programmable, typesafe document generation in Scala"
 let connected = false;
 let millPath = "mill";
 
+// Security: Validate inputs to prevent path traversal and command injection
+function validateModuleName(module) {
+  if (!module) return "docs";
+  // Module names should be valid Scala identifiers (alphanumeric and underscores)
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(module)) {
+    throw new Error("Invalid module name: must be a valid identifier (alphanumeric and underscores only)");
+  }
+  // Prevent path traversal attempts
+  if (module.includes("..") || module.includes("/") || module.includes("\\")) {
+    throw new Error("Invalid module name: path traversal not allowed");
+  }
+  return module;
+}
+
+function validatePath(path) {
+  if (!path) return null;
+  // Reject dangerous path characters and traversal
+  if (path.includes("..")) {
+    throw new Error("Path traversal not allowed");
+  }
+  if (/[;&|`$]/.test(path)) {
+    throw new Error("Invalid characters in path");
+  }
+  return path;
+}
+
 async function runCommand(args, cwd = null) {
   const cmd = new Deno.Command(millPath, {
     args,
@@ -82,8 +108,13 @@ export const tools = [
       },
     },
     execute: async ({ path, module }) => {
-      const mod = module || "docs";
-      return await runCommand([`${mod}.compile`], path);
+      try {
+        const safePath = validatePath(path);
+        const safeMod = validateModuleName(module);
+        return await runCommand([`${safeMod}.compile`], safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -97,8 +128,13 @@ export const tools = [
       },
     },
     execute: async ({ path, module }) => {
-      const mod = module || "docs";
-      return await runCommand([`${mod}.run`], path);
+      try {
+        const safePath = validatePath(path);
+        const safeMod = validateModuleName(module);
+        return await runCommand([`${safeMod}.run`], safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -112,8 +148,13 @@ export const tools = [
       },
     },
     execute: async ({ path, module }) => {
-      const mod = module || "docs";
-      return await runCommand(["--watch", `${mod}.compile`], path);
+      try {
+        const safePath = validatePath(path);
+        const safeMod = validateModuleName(module);
+        return await runCommand(["--watch", `${safeMod}.compile`], safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -125,7 +166,14 @@ export const tools = [
         path: { type: "string", description: "Path to project root" },
       },
     },
-    execute: async ({ path }) => await runCommand(["clean"], path),
+    execute: async ({ path }) => {
+      try {
+        const safePath = validatePath(path);
+        return await runCommand(["clean"], safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
+    },
   },
   {
     name: "scalatex_version",

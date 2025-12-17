@@ -1,15 +1,21 @@
 ;; SPDX-License-Identifier: AGPL-3.0-or-later
 ;; SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
-;; ECOSYSTEM.scm — template-repo
+;; ECOSYSTEM.scm — macrauchenia-ssg
 
 (ecosystem
   (version "1.0.0")
-  (name "template-repo")
-  (type "project")
-  (purpose "Project in the hyperpolymath ecosystem")
+  (name "macrauchenia-ssg")
+  (type "satellite")
+  (purpose "Deno-based MCP adapters for 28+ static site generators")
 
   (position-in-ecosystem
-    "Part of hyperpolymath ecosystem. Follows RSR guidelines.")
+    "Satellite SSG implementation in hyperpolymath ecosystem.
+     Provides Deno adapters that wrap SSG CLIs via MCP protocol.
+     Follows RSR guidelines for security and maintainability.")
+
+  (supported-ssg-count 28)
+  (adapter-languages '("rust" "haskell" "elixir" "clojure" "julia" "racket"
+                       "common-lisp" "ocaml" "erlang" "nim" "d" "scala"))
 
   (related-projects
     (project
@@ -18,11 +24,13 @@
       (relationship "hub")
       (description "Unified MCP server for 28 SSGs - provides adapter interface")
       (differentiation
-        "poly-ssg-mcp = Hub with all SSG adapters via MCP
-         This project = Satellite SSG implementation using the hub"))
-    (project (name "rhodium-standard-repositories")
-             (url "https://github.com/hyperpolymath/rhodium-standard-repositories")
-             (relationship "standard")))
+        "poly-ssg-mcp = Hub that orchestrates all adapters via MCP
+         macrauchenia-ssg = Individual adapter implementations"))
+    (project
+      (name "rhodium-standard-repositories")
+      (url "https://github.com/hyperpolymath/rhodium-standard-repositories")
+      (relationship "standard")))
 
-  (what-this-is "Project in the hyperpolymath ecosystem")
-  (what-this-is-not "- NOT exempt from RSR compliance"))
+  (what-this-is "Satellite SSG adapter implementation for hyperpolymath ecosystem")
+  (what-this-is-not "- NOT the hub server (that's poly-ssg-mcp)
+                     - NOT exempt from RSR compliance"))

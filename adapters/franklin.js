@@ -13,6 +13,46 @@ export const description = "Static site generator for technical blogging in Juli
 let connected = false;
 let juliaPath = "julia";
 
+// Security: Validate inputs to prevent Julia code injection
+function sanitizeJuliaString(str) {
+  if (typeof str !== "string") return "";
+  // Reject strings with dangerous Julia metacharacters
+  if (/[;`$()\\"\n\r]/.test(str)) {
+    throw new Error("Invalid characters in input: Julia special characters not allowed");
+  }
+  // Allow only safe characters
+  if (!/^[a-zA-Z0-9._\-/ ]+$/.test(str)) {
+    throw new Error("Invalid characters in input: only alphanumeric, dots, dashes, underscores, slashes, and spaces allowed");
+  }
+  return str;
+}
+
+function sanitizeHost(str) {
+  if (typeof str !== "string") return "";
+  // Allow only valid hostname characters
+  if (!/^[a-zA-Z0-9._\-:]+$/.test(str)) {
+    throw new Error("Invalid host format");
+  }
+  return str;
+}
+
+function validatePath(path) {
+  if (!path) return ".";
+  const sanitized = sanitizeJuliaString(path);
+  if (sanitized.includes("..")) {
+    throw new Error("Path traversal not allowed");
+  }
+  return sanitized;
+}
+
+function validatePort(port) {
+  const p = parseInt(port, 10);
+  if (isNaN(p) || p < 1 || p > 65535) {
+    throw new Error("Invalid port number: must be between 1 and 65535");
+  }
+  return p;
+}
+
 async function runJulia(code, cwd = null) {
   const cmd = new Deno.Command(juliaPath, {
     args: ["-e", code],
@@ -66,8 +106,13 @@ export const tools = [
       },
     },
     execute: async ({ path, template }) => {
-      const tmpl = template ? `; template="${template}"` : "";
-      return await runJulia(`using Franklin; newsite("${path || "."}"${tmpl})`);
+      try {
+        const safePath = validatePath(path);
+        const tmpl = template ? `, template="${sanitizeJuliaString(template)}"` : "";
+        return await runJulia(`using Franklin; newsite("${safePath}"${tmpl})`);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -82,10 +127,16 @@ export const tools = [
       },
     },
     execute: async ({ path, port, host }) => {
-      let args = "";
-      if (port) args += `port=${port}, `;
-      if (host) args += `host="${host}", `;
-      return await runJulia(`using Franklin; serve(${args.slice(0, -2)})`, path);
+      try {
+        const safePath = validatePath(path);
+        let args = [];
+        if (port) args.push(`port=${validatePort(port)}`);
+        if (host) args.push(`host="${sanitizeHost(host)}"`);
+        const argsStr = args.length ? args.join(", ") : "";
+        return await runJulia(`using Franklin; serve(${argsStr})`, safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -100,11 +151,16 @@ export const tools = [
       },
     },
     execute: async ({ path, minify, prerender }) => {
-      let args = [];
-      if (minify !== false) args.push("minify=true");
-      if (prerender !== false) args.push("prerender=true");
-      const argsStr = args.length ? args.join(", ") : "";
-      return await runJulia(`using Franklin; optimize(${argsStr})`, path);
+      try {
+        const safePath = validatePath(path);
+        let args = [];
+        if (minify !== false) args.push("minify=true");
+        if (prerender !== false) args.push("prerender=true");
+        const argsStr = args.length ? args.join(", ") : "";
+        return await runJulia(`using Franklin; optimize(${argsStr})`, safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -117,7 +173,12 @@ export const tools = [
       },
     },
     execute: async ({ path }) => {
-      return await runJulia(`using Franklin; publish()`, path);
+      try {
+        const safePath = validatePath(path);
+        return await runJulia(`using Franklin; publish()`, safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {

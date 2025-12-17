@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-# Dependabot configuration for RSR-compliant repositories
-# Covers common ecosystems - remove unused ones for your project
+# Dependabot configuration for macrauchenia-ssg
+# Only includes ecosystems actually used in this project
 
 version: 2
 updates:
-  # GitHub Actions - always include
+  # GitHub Actions - always include for CI security
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -14,35 +14,6 @@ updates:
         patterns:
           - "*"
 
-  # Rust/Cargo
-  - package-ecosystem: "cargo"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
-
-  # Elixir/Mix
-  - package-ecosystem: "mix"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-
-  # Node.js/npm
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-
-  # Python/pip
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-
-  # Nix flakes
-  - package-ecosystem: "nix"
-    directory: "/"
-    schedule:
-      interval: "weekly"
+  # Note: This project uses Deno-based JavaScript adapters
+  # npm ecosystem is included in case package.json is added for tooling
+  # Deno dependencies are managed via import URLs (no native dependabot support)
