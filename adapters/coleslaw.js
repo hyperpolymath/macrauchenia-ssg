@@ -13,6 +13,37 @@ export const description = "Flexible static blog/site generator written in Commo
 let connected = false;
 let sblPath = "sbcl";
 
+// Security: Validate inputs to prevent Lisp code injection
+function sanitizeLispString(str) {
+  if (typeof str !== "string") return "";
+  // Reject strings with dangerous Lisp metacharacters
+  if (/[()"`'\\;#|]/.test(str)) {
+    throw new Error("Invalid characters in input: Lisp special characters not allowed");
+  }
+  // Allow only safe characters
+  if (!/^[a-zA-Z0-9._\-/ ]+$/.test(str)) {
+    throw new Error("Invalid characters in input: only alphanumeric, dots, dashes, underscores, slashes, and spaces allowed");
+  }
+  return str;
+}
+
+function validatePath(path) {
+  if (!path) return ".";
+  const sanitized = sanitizeLispString(path);
+  if (sanitized.includes("..")) {
+    throw new Error("Path traversal not allowed");
+  }
+  return sanitized;
+}
+
+function validatePort(port) {
+  const p = parseInt(port, 10);
+  if (isNaN(p) || p < 1 || p > 65535) {
+    throw new Error("Invalid port number: must be between 1 and 65535");
+  }
+  return p;
+}
+
 async function runCommand(args, cwd = null) {
   const cmd = new Deno.Command(sblPath, {
     args: ["--script", ...args],
@@ -82,7 +113,12 @@ export const tools = [
       },
     },
     execute: async ({ path }) => {
-      return await runColeslaw(`(coleslaw:setup "${path || "."}")`, path);
+      try {
+        const safePath = validatePath(path);
+        return await runColeslaw(`(coleslaw:setup "${safePath}")`, safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -95,7 +131,12 @@ export const tools = [
       },
     },
     execute: async ({ path }) => {
-      return await runColeslaw(`(coleslaw:main "${path || "."}")`, path);
+      try {
+        const safePath = validatePath(path);
+        return await runColeslaw(`(coleslaw:main "${safePath}")`, safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -109,8 +150,13 @@ export const tools = [
       },
     },
     execute: async ({ path, port }) => {
-      const p = port || 8080;
-      return await runColeslaw(`(coleslaw:preview :port ${p})`, path);
+      try {
+        const safePath = validatePath(path);
+        const safePort = validatePort(port || 8080);
+        return await runColeslaw(`(coleslaw:preview :port ${safePort})`, safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
@@ -125,7 +171,13 @@ export const tools = [
       required: ["title"],
     },
     execute: async ({ path, title }) => {
-      return await runColeslaw(`(coleslaw:new-post "${title}")`, path);
+      try {
+        const safePath = validatePath(path);
+        const safeTitle = sanitizeLispString(title);
+        return await runColeslaw(`(coleslaw:new-post "${safeTitle}")`, safePath);
+      } catch (e) {
+        return { success: false, stdout: "", stderr: e.message, code: 1 };
+      }
     },
   },
   {
