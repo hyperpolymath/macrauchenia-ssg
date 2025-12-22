@@ -3,41 +3,40 @@
 ;; SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
 
 (define metadata
-  '((version . "0.3.0")
-    (updated . "2025-12-22")
+  '((version . "0.2.0")
+    (updated . "2025-12-17")
     (project . "macrauchenia-ssg")
     (description . "Deno-based MCP adapters for 28+ static site generators")))
 
 (define current-position
-  '((phase . "v0.3 - Testing & Quality")
-    (overall-completion . 65)
+  '((phase . "v0.2 - Core Development")
+    (overall-completion . 35)
     (components
      ((rsr-compliance ((status . "complete") (completion . 100)))
-      (adapters ((status . "complete") (completion . 100) (count . 28)))
-      (security ((status . "complete") (completion . 100)))
-      (testing ((status . "in-progress") (completion . 20)))
-      (documentation ((status . "in-progress") (completion . 70)))
-      (automation ((status . "complete") (completion . 100)))
-      (strategic-scm ((status . "complete") (completion . 100)))))))
+      (adapters ((status . "in-progress") (completion . 60) (count . 28)))
+      (security ((status . "in-progress") (completion . 80)))
+      (testing ((status . "not-started") (completion . 0)))
+      (documentation ((status . "in-progress") (completion . 30)))))))
 
 (define blockers-and-issues
   '((critical ())
     (high-priority
-     (("Implement adapter test suite" . "testing")))
+     (("Add input validation to adapters" . "security")
+      ("Implement adapter test suite" . "testing")))
     (medium-priority
      (("Add TypeScript types" . "dx")
-      ("Complete README.adoc content" . "docs")))))
+      ("Complete README.adoc" . "docs")))))
 
 (define critical-next-actions
   '((immediate
-     (("Create unit test infrastructure" . high)
-      ("Add tests for critical adapters" . high)))
+     (("Input validation for command args" . critical)
+      ("Complete SECURITY.md" . high)))
     (this-week
-     (("Achieve 70% test coverage" . high)
-      ("Complete E2E tests" . medium)))
+     (("Add adapter unit tests" . high)
+      ("Deno permission audit" . medium)))
     (this-month
      (("Integration tests with poly-ssg-mcp" . medium)
-      ("TypeScript declarations" . medium)))))
+      ("Documentation completion" . medium)))))
 
 (define roadmap
   '((v0.1 ((name . "Initial Setup")
@@ -76,26 +75,12 @@
   '((snapshots
      ((date . "2025-12-15") (session . "initial") (notes . "SCM files added"))
      ((date . "2025-12-17") (session . "security-review")
-      (notes . "Fixed SCM metadata, security hardening, roadmap created"))
-     ((date . "2025-12-22") (session . "infrastructure-complete")
-      (notes . "Added justfile, Mustfile, cookbook.adoc, PLAYBOOK.scm, AGENTIC.scm, NEUROSYM.scm, deno.json, CI workflow")))))
+      (notes . "Fixed SCM metadata, security hardening, roadmap created")))))
 
 (define state-summary
   '((project . "macrauchenia-ssg")
-    (version . "0.3.0")
-    (completion . 65)
-    (blockers . 1)
-    (next-milestone . "v0.3 - Testing & Quality")
-    (updated . "2025-12-22")))
-
-(define file-inventory
-  '((scm-files
-     . ("META.scm" "ECOSYSTEM.scm" "STATE.scm" "PLAYBOOK.scm" "AGENTIC.scm" "NEUROSYM.scm"))
-    (automation
-     . ("justfile" "Mustfile" "deno.json"))
-    (documentation
-     . ("cookbook.adoc" "README.adoc" "SECURITY.md" "CONTRIBUTING.md"))
-    (adapters
-     . 28)
-    (workflows
-     . ("ci.yml" "codeql.yml"))))
+    (version . "0.2.0")
+    (completion . 35)
+    (blockers . 2)
+    (next-milestone . "v0.2 - Core Development")
+    (updated . "2025-12-17")))
