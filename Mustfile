@@ -1,0 +1,169 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
+# Mustfile - Required invariants for macrauchenia-ssg
+# These are MUST conditions - failures block commits/releases
+
+# ============================================================================
+# SECURITY INVARIANTS
+# ============================================================================
+
+[must.security.no-eval]
+description = "No use of eval() or Function constructor"
+command = "! grep -rE 'eval\\s*\\(|new\\s+Function\\s*\\(' adapters/"
+severity = "critical"
+
+[must.security.no-hardcoded-secrets]
+description = "No hardcoded passwords, API keys, or secrets"
+command = "! grep -rEi '(password|secret|api_key|apikey)\\s*[:=]\\s*[\"'\\']' adapters/"
+severity = "critical"
+
+[must.security.input-validation]
+description = "All user inputs must be validated"
+command = "grep -l 'validate\\|sanitize' adapters/*.js | wc -l"
+expect = ">= 6"
+severity = "high"
+
+[must.security.no-shell-injection]
+description = "No direct shell command string interpolation"
+command = "! grep -rE 'exec\\s*\\(\\s*`|spawn\\s*\\(\\s*`' adapters/"
+severity = "critical"
+
+# ============================================================================
+# CODE QUALITY INVARIANTS
+# ============================================================================
+
+[must.quality.lint-clean]
+description = "All code must pass linting"
+command = "deno lint adapters/"
+severity = "high"
+
+[must.quality.type-check]
+description = "All code must pass type checking"
+command = "deno check adapters/*.js"
+severity = "high"
+
+[must.quality.format]
+description = "All code must be formatted"
+command = "deno fmt --check adapters/"
+severity = "medium"
+
+[must.quality.spdx-headers]
+description = "All files must have SPDX license headers"
+command = "! find adapters -name '*.js' -exec head -1 {} \\; | grep -v SPDX"
+severity = "medium"
+
+# ============================================================================
+# STRUCTURAL INVARIANTS
+# ============================================================================
+
+[must.structure.exports]
+description = "All adapters must export name, language, description, tools"
+check = """
+for f in adapters/*.js; do
+  deno eval "import('file://$PWD/$f').then(m => {
+    if (!m.name) throw 'Missing name';
+    if (!m.tools) throw 'Missing tools';
+  })" || exit 1
+done
+"""
+severity = "critical"
+
+[must.structure.tools-schema]
+description = "All tool definitions must have inputSchema"
+check = """
+deno eval "
+  const files = [...Deno.readDirSync('adapters')].filter(f => f.name.endsWith('.js'));
+  for (const f of files) {
+    const m = await import('./adapters/' + f.name);
+    for (const t of m.tools || []) {
+      if (!t.inputSchema) throw f.name + ': ' + t.name + ' missing inputSchema';
+    }
+  }
+"
+"""
+severity = "high"
+
+# ============================================================================
+# DOCUMENTATION INVARIANTS
+# ============================================================================
+
+[must.docs.readme]
+description = "README.adoc must exist and not be empty"
+command = "test -s README.adoc"
+severity = "medium"
+
+[must.docs.adapters-readme]
+description = "adapters/README.md must exist"
+command = "test -f adapters/README.md"
+severity = "low"
+
+[must.docs.security-policy]
+description = "SECURITY.md must exist"
+command = "test -f SECURITY.md"
+severity = "high"
+
+# ============================================================================
+# TESTING INVARIANTS
+# ============================================================================
+
+[must.test.exists]
+description = "Test directory must exist"
+command = "test -d tests"
+severity = "high"
+
+[must.test.coverage]
+description = "Test coverage must be >= 70%"
+command = "deno test --coverage=cov tests/ && deno coverage cov | grep -oP '\\d+\\.\\d+' | head -1"
+expect = ">= 70"
+severity = "high"
+skip_until = "2026-01-15"
+
+# ============================================================================
+# CI/CD INVARIANTS
+# ============================================================================
+
+[must.ci.workflow-exists]
+description = "CI workflow must exist"
+command = "test -f .github/workflows/ci.yml"
+severity = "high"
+
+[must.ci.sha-pinned-actions]
+description = "All GitHub Actions must be SHA-pinned"
+command = "! grep -E 'uses:\\s+[^@]+@v[0-9]' .github/workflows/*.yml"
+severity = "high"
+
+# ============================================================================
+# SCM INVARIANTS
+# ============================================================================
+
+[must.scm.meta-exists]
+description = "META.scm must exist"
+command = "test -f META.scm"
+severity = "medium"
+
+[must.scm.state-exists]
+description = "STATE.scm must exist"
+command = "test -f STATE.scm"
+severity = "medium"
+
+[must.scm.ecosystem-exists]
+description = "ECOSYSTEM.scm must exist"
+command = "test -f ECOSYSTEM.scm"
+severity = "medium"
+
+# ============================================================================
+# RELEASE INVARIANTS
+# ============================================================================
+
+[must.release.version-bump]
+description = "Version must be bumped for release"
+applies_to = "release"
+check = "git diff HEAD~1 -- STATE.scm | grep version"
+severity = "high"
+
+[must.release.changelog-updated]
+description = "CHANGELOG must be updated for release"
+applies_to = "release"
+command = "git diff HEAD~1 -- CHANGELOG.md | wc -l"
+expect = "> 0"
+severity = "medium"
