@@ -3,7 +3,7 @@
 :toclevels: 2
 
 image:https://img.shields.io/badge/RSR-compliant-gold[RSR Compliant,link=https://github.com/hyperpolymath/rhodium-standard-repositories]
-image:https://img.shields.io/badge/poly--ssg-satellite-blue[poly-ssg,link=https://github.com/hyperpolymath/poly-ssg]
+image:https://img.shields.io/badge/poly--ssg--mcp-satellite-blue[poly-ssg-mcp,link=https://github.com/hyperpolymath/poly-ssg-mcp]
 image:https://img.shields.io/badge/license-MIT%20OR%20AGPL--3.0-green[License]
 image:https://img.shields.io/badge/status-experimental-orange[Experimental]
 
@@ -98,9 +98,9 @@ All transformations are pure functions. Side effects are isolated to file I/O at
 * opam package manager
 * dune build system
 
-== Part of poly-ssg
+== Part of poly-ssg-mcp
 
-macrauchenia-ssg is part of the https://github.com/hyperpolymath/poly-ssg[poly-ssg] family, unified through https://github.com/hyperpolymath/poly-ssg-mcp[MCP integration].
+macrauchenia-ssg is a satellite of https://github.com/hyperpolymath/poly-ssg-mcp[poly-ssg-mcp], the unified MCP server providing access to static site generators across 19 programming languages. The MCP integration enables seamless tooling through `macrauchenia_init`, `macrauchenia_build`, and `macrauchenia_serve` commands.
 
 == License
 
