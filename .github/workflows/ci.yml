@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@5fae568d37c3b73449009674875529a984555dd1 # v2.0.0
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.0
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -37,10 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@5fae568d37c3b73449009674875529a984555dd1 # v2.0.0
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.0
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -52,10 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@5fae568d37c3b73449009674875529a984555dd1 # v2.0.0
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.0
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -68,10 +68,10 @@ jobs:
     needs: [lint, format, typecheck]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@5fae568d37c3b73449009674875529a984555dd1 # v2.0.0
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.0
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -82,7 +82,7 @@ jobs:
         run: deno coverage coverage --lcov > coverage.lcov
 
       - name: Upload coverage
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4.6.0
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           file: coverage.lcov
           fail_ci_if_error: false
@@ -92,10 +92,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@5fae568d37c3b73449009674875529a984555dd1 # v2.0.0
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.0
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -131,10 +131,10 @@ jobs:
     needs: [test, security]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@5fae568d37c3b73449009674875529a984555dd1 # v2.0.0
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.0
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
@@ -152,10 +152,10 @@ jobs:
     needs: [build]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup Deno
-        uses: denoland/setup-deno@5fae568d37c3b73449009674875529a984555dd1 # v2.0.0
+        uses: denoland/setup-deno@e95548e56dfa95d4e1a28d6f422fafe75c4c26fb # v2.0.0
         with:
           deno-version: ${{ env.DENO_VERSION }}
 
