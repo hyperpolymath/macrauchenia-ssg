@@ -49,7 +49,10 @@ __pycache__/
 # Ada/SPARK
 *.ali
 /obj/
-/bin/
+
+# OCaml/Dune (bin/ contains source, not compiled binaries)
+!bin/*.ml
+!bin/dune
 
 # Haskell
 /.stack-work/
